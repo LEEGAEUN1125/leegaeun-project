@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>오늘 뭐 먹지?</title>
+
   <style>
     :root{
       --bg:#f7f4ef;
@@ -17,388 +18,1811 @@
       --soft:#fff2e9;
       --shadow:0 14px 40px rgba(73,56,43,.10);
     }
-    *{box-sizing:border-box}
+
+    *{
+      box-sizing:border-box;
+    }
+
     body{
       margin:0;
       font-family:Inter, Pretendard, "Noto Sans KR", system-ui, sans-serif;
       color:var(--ink);
+
       background:
-        radial-gradient(circle at 10% 0%, rgba(255,200,87,.22), transparent 22%),
-        radial-gradient(circle at 100% 20%, rgba(255,122,69,.14), transparent 28%),
+        radial-gradient(
+          circle at 10% 0%,
+          rgba(255,200,87,.22),
+          transparent 22%
+        ),
+        radial-gradient(
+          circle at 100% 20%,
+          rgba(255,122,69,.14),
+          transparent 28%
+        ),
         var(--bg);
+
       min-height:100vh;
     }
-    button,select,input{font:inherit}
-    .wrap{max-width:1180px;margin:auto;padding:22px}
+
+    button,
+    select,
+    input{
+      font:inherit;
+    }
+
+    .wrap{
+      max-width:1180px;
+      margin:auto;
+      padding:22px;
+    }
+
+
+    /* =========================
+       상단 영역
+    ========================= */
+
     header{
-      display:flex;justify-content:space-between;align-items:center;gap:16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
       padding:6px 0 22px;
     }
-    .brand{display:flex;align-items:center;gap:12px}
-    .logo{
-      width:48px;height:48px;border-radius:15px;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      display:grid;place-items:center;font-size:24px;box-shadow:var(--shadow);
-    }
-    h1{margin:0;font-size:clamp(1.4rem,3vw,2.1rem);letter-spacing:-.04em}
-    .sub{margin-top:5px;color:var(--muted);font-size:.92rem}
-    .ghost{
-      border:1px solid var(--line);background:#fff;border-radius:999px;
-      padding:11px 15px;cursor:pointer;color:var(--ink)
-    }
-    .header-actions{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap;
-}
 
-.nav-link{
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-}
-    .hero{
-      background:linear-gradient(135deg,#2f2b27,#4b4037);
-      color:white;border-radius:28px;padding:30px;
-      display:grid;grid-template-columns:1.3fr .7fr;gap:22px;
-      box-shadow:var(--shadow);overflow:hidden;position:relative;
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
     }
-    .hero:after{
-      content:"";position:absolute;width:280px;height:280px;border-radius:50%;
-      background:rgba(255,255,255,.05);right:-80px;top:-90px;
+
+    .logo{
+      width:48px;
+      height:48px;
+      border-radius:15px;
+
+      background:
+        linear-gradient(
+          135deg,
+          var(--accent),
+          var(--accent2)
+        );
+
+      display:grid;
+      place-items:center;
+
+      font-size:24px;
+
+      box-shadow:var(--shadow);
     }
-    .eyebrow{font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;color:#ffd7c2;font-weight:800}
-    .hero h2{
-      font-size:clamp(2rem,5vw,4.2rem);
-      line-height:1.02;margin:10px 0 12px;letter-spacing:-.06em
+
+    h1{
+      margin:0;
+      font-size:clamp(1.4rem,3vw,2.1rem);
+      letter-spacing:-.04em;
     }
-    .hero p{color:#e8ded6;line-height:1.65;max-width:680px}
-    .hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
-    .primary,.secondary{
-      border:0;border-radius:999px;padding:12px 17px;cursor:pointer;font-weight:750;transition:.2s
+
+    .sub{
+      margin-top:5px;
+      color:var(--muted);
+      font-size:.92rem;
     }
-    .primary{background:var(--accent);color:#fff}
-    .secondary{background:#fff;color:var(--ink)}
-    .primary:hover,.secondary:hover,.ghost:hover{transform:translateY(-1px)}
-    .plate{
-      display:grid;place-items:center;position:relative;z-index:1;min-height:220px;
+
+
+    /* 상단 오른쪽 버튼 그룹 */
+
+    .header-actions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:8px;
+      flex-wrap:wrap;
     }
-    .dish{
-      width:min(220px,68vw);aspect-ratio:1;border-radius:50%;
-      background:#faf5ed;border:16px solid #ddd2c4;
-      display:grid;place-items:center;box-shadow:0 24px 50px rgba(0,0,0,.22);
-      font-size:78px;transform:rotate(-5deg);
-    }
-    .grid{
-      margin-top:24px;display:grid;grid-template-columns:290px 1fr;gap:22px;
-    }
-    .panel{
-      background:rgba(255,253,249,.92);backdrop-filter:blur(10px);
-      border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:var(--shadow);
-    }
-    .panel h3{margin:0 0 17px;font-size:1.05rem}
-    .field{margin-bottom:20px}
-    label{display:block;color:var(--muted);font-size:.82rem;margin-bottom:8px}
-    select{
-      width:100%;border:1px solid var(--line);background:#fff;border-radius:12px;
-      padding:11px 12px;color:var(--ink)
-    }
-    .chip-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .chip{
-      border:1px solid var(--line);background:#fff;border-radius:12px;
-      padding:10px;cursor:pointer;color:var(--ink)
-    }
-    .chip.active{background:var(--soft);border-color:#ffc5a8;color:#a64f28}
-    .range-row{display:flex;justify-content:space-between;color:var(--muted);font-size:.82rem}
-    input[type="range"]{width:100%}
-    .summary{
-      display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:14px
-    }
-    .summary .big{font-size:1.45rem;font-weight:800;letter-spacing:-.03em}
-    .summary span{color:var(--muted);font-size:.84rem}
-    .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-    .food-card{
-      border:1px solid var(--line);border-radius:18px;background:#fff;padding:16px;
-      display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;
+
+
+    /* 공통 버튼 */
+
+    .ghost{
+      border:1px solid var(--line);
+      background:#fff;
+
+      border-radius:999px;
+
+      padding:11px 15px;
+
+      cursor:pointer;
+
+      color:var(--ink);
+
       transition:.2s;
     }
-    .food-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(60,44,33,.08)}
+
+
+    /* 페이지 이동 링크 */
+
+    .nav-link{
+      text-decoration:none;
+
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+
+      gap:5px;
+    }
+
+
+    /* =========================
+       메인 HERO 영역
+    ========================= */
+
+    .hero{
+      background:
+        linear-gradient(
+          135deg,
+          #2f2b27,
+          #4b4037
+        );
+
+      color:white;
+
+      border-radius:28px;
+
+      padding:30px;
+
+      display:grid;
+
+      grid-template-columns:1.3fr .7fr;
+
+      gap:22px;
+
+      box-shadow:var(--shadow);
+
+      overflow:hidden;
+
+      position:relative;
+    }
+
+
+    .hero:after{
+      content:"";
+
+      position:absolute;
+
+      width:280px;
+      height:280px;
+
+      border-radius:50%;
+
+      background:rgba(255,255,255,.05);
+
+      right:-80px;
+      top:-90px;
+    }
+
+
+    .eyebrow{
+      font-size:.76rem;
+
+      letter-spacing:.12em;
+
+      text-transform:uppercase;
+
+      color:#ffd7c2;
+
+      font-weight:800;
+    }
+
+
+    .hero h2{
+      font-size:clamp(2rem,5vw,4.2rem);
+
+      line-height:1.02;
+
+      margin:10px 0 12px;
+
+      letter-spacing:-.06em;
+    }
+
+
+    .hero p{
+      color:#e8ded6;
+
+      line-height:1.65;
+
+      max-width:680px;
+    }
+
+
+    .hero-actions{
+      display:flex;
+
+      flex-wrap:wrap;
+
+      gap:10px;
+
+      margin-top:20px;
+    }
+
+
+    .primary,
+    .secondary{
+      border:0;
+
+      border-radius:999px;
+
+      padding:12px 17px;
+
+      cursor:pointer;
+
+      font-weight:750;
+
+      transition:.2s;
+    }
+
+
+    .primary{
+      background:var(--accent);
+      color:#fff;
+    }
+
+
+    .secondary{
+      background:#fff;
+      color:var(--ink);
+    }
+
+
+    .primary:hover,
+    .secondary:hover,
+    .ghost:hover{
+      transform:translateY(-1px);
+    }
+
+
+    /* =========================
+       접시
+    ========================= */
+
+    .plate{
+      display:grid;
+
+      place-items:center;
+
+      position:relative;
+
+      z-index:1;
+
+      min-height:220px;
+    }
+
+
+    .dish{
+      width:min(220px,68vw);
+
+      aspect-ratio:1;
+
+      border-radius:50%;
+
+      background:#faf5ed;
+
+      border:16px solid #ddd2c4;
+
+      display:grid;
+
+      place-items:center;
+
+      box-shadow:
+        0 24px 50px rgba(0,0,0,.22);
+
+      font-size:78px;
+
+      transform:rotate(-5deg);
+    }
+
+
+    /* =========================
+       메뉴 영역
+    ========================= */
+
+    .grid{
+      margin-top:24px;
+
+      display:grid;
+
+      grid-template-columns:290px 1fr;
+
+      gap:22px;
+    }
+
+
+    .panel{
+      background:
+        rgba(255,253,249,.92);
+
+      backdrop-filter:blur(10px);
+
+      border:1px solid var(--line);
+
+      border-radius:24px;
+
+      padding:20px;
+
+      box-shadow:var(--shadow);
+    }
+
+
+    .panel h3{
+      margin:0 0 17px;
+
+      font-size:1.05rem;
+    }
+
+
+    .field{
+      margin-bottom:20px;
+    }
+
+
+    label{
+      display:block;
+
+      color:var(--muted);
+
+      font-size:.82rem;
+
+      margin-bottom:8px;
+    }
+
+
+    select{
+      width:100%;
+
+      border:1px solid var(--line);
+
+      background:#fff;
+
+      border-radius:12px;
+
+      padding:11px 12px;
+
+      color:var(--ink);
+    }
+
+
+    .chip-grid{
+      display:grid;
+
+      grid-template-columns:1fr 1fr;
+
+      gap:8px;
+    }
+
+
+    .chip{
+      border:1px solid var(--line);
+
+      background:#fff;
+
+      border-radius:12px;
+
+      padding:10px;
+
+      cursor:pointer;
+
+      color:var(--ink);
+    }
+
+
+    .chip.active{
+      background:var(--soft);
+
+      border-color:#ffc5a8;
+
+      color:#a64f28;
+    }
+
+
+    .range-row{
+      display:flex;
+
+      justify-content:space-between;
+
+      color:var(--muted);
+
+      font-size:.82rem;
+    }
+
+
+    input[type="range"]{
+      width:100%;
+    }
+
+
+    /* =========================
+       메뉴 리스트
+    ========================= */
+
+    .summary{
+      display:flex;
+
+      justify-content:space-between;
+
+      align-items:end;
+
+      gap:12px;
+
+      margin-bottom:14px;
+    }
+
+
+    .summary .big{
+      font-size:1.45rem;
+
+      font-weight:800;
+
+      letter-spacing:-.03em;
+    }
+
+
+    .summary span{
+      color:var(--muted);
+
+      font-size:.84rem;
+    }
+
+
+    .cards{
+      display:grid;
+
+      grid-template-columns:
+        repeat(2,1fr);
+
+      gap:14px;
+    }
+
+
+    .food-card{
+      border:1px solid var(--line);
+
+      border-radius:18px;
+
+      background:#fff;
+
+      padding:16px;
+
+      display:grid;
+
+      grid-template-columns:
+        auto 1fr auto;
+
+      gap:12px;
+
+      align-items:center;
+
+      transition:.2s;
+    }
+
+
+    .food-card:hover{
+      transform:translateY(-2px);
+
+      box-shadow:
+        0 12px 28px rgba(60,44,33,.08);
+    }
+
+
     .emoji{
-      width:54px;height:54px;border-radius:15px;background:#fff4ec;
-      display:grid;place-items:center;font-size:28px
+      width:54px;
+
+      height:54px;
+
+      border-radius:15px;
+
+      background:#fff4ec;
+
+      display:grid;
+
+      place-items:center;
+
+      font-size:28px;
     }
-    .food-name{font-weight:800}
-    .food-meta{margin-top:4px;color:var(--muted);font-size:.84rem}
+
+
+    .food-name{
+      font-weight:800;
+    }
+
+
+    .food-meta{
+      margin-top:4px;
+
+      color:var(--muted);
+
+      font-size:.84rem;
+    }
+
+
     .badge{
-      font-size:.72rem;background:#f2f4f1;padding:6px 8px;border-radius:999px;color:#53645c
+      font-size:.72rem;
+
+      background:#f2f4f1;
+
+      padding:6px 8px;
+
+      border-radius:999px;
+
+      color:#53645c;
     }
+
+
     .pick-btn{
-      grid-column:1/-1;border:0;background:#2f2b27;color:#fff;border-radius:12px;
-      padding:10px;cursor:pointer;font-weight:700
+      grid-column:1/-1;
+
+      border:0;
+
+      background:#2f2b27;
+
+      color:#fff;
+
+      border-radius:12px;
+
+      padding:10px;
+
+      cursor:pointer;
+
+      font-weight:700;
     }
-    .empty{padding:40px;text-align:center;color:var(--muted)}
+
+
+    .empty{
+      padding:40px;
+
+      text-align:center;
+
+      color:var(--muted);
+    }
+
+
+    /* =========================
+       선택 결과
+    ========================= */
+
     .result-box{
-      margin-top:16px;border-radius:20px;padding:18px;background:linear-gradient(135deg,#fff5eb,#fffdf8);
-      border:1px solid #f0d9c9;display:none
+      margin-top:16px;
+
+      border-radius:20px;
+
+      padding:18px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #fff5eb,
+          #fffdf8
+        );
+
+      border:1px solid #f0d9c9;
+
+      display:none;
     }
-    .result-box.show{display:block}
-    .result-label{font-size:.76rem;color:#b5653b;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-    .result-title{font-size:1.5rem;font-weight:900;margin-top:6px}
-    .result-desc{color:var(--muted);margin-top:5px}
+
+
+    .result-box.show{
+      display:block;
+    }
+
+
+    .result-label{
+      font-size:.76rem;
+
+      color:#b5653b;
+
+      font-weight:800;
+
+      letter-spacing:.08em;
+
+      text-transform:uppercase;
+    }
+
+
+    .result-title{
+      font-size:1.5rem;
+
+      font-weight:900;
+
+      margin-top:6px;
+    }
+
+
+    .result-desc{
+      color:var(--muted);
+
+      margin-top:5px;
+    }
+
+
+    /* =========================
+       태블릿
+    ========================= */
+
     @media (max-width:850px){
-      .hero{grid-template-columns:1fr}.plate{min-height:160px}.dish{width:150px;font-size:56px}
-      .grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr}
+
+      .hero{
+        grid-template-columns:1fr;
+      }
+
+      .plate{
+        min-height:160px;
+      }
+
+      .dish{
+        width:150px;
+
+        font-size:56px;
+      }
+
+      .grid{
+        grid-template-columns:1fr;
+      }
+
+      .cards{
+        grid-template-columns:1fr;
+      }
+
     }
+
+
+    /* =========================
+       모바일
+    ========================= */
+
     @media (max-width:520px){
-      .wrap{padding:14px}.hero{padding:22px;border-radius:22px}
-      header{align-items:flex-start}.ghost{padding:9px 12px}
-      .hero-actions{display:grid;grid-template-columns:1fr 1fr}
-      .primary,.secondary{width:100%}
-      .summary{align-items:flex-start;flex-direction:column}
-      .food-card{grid-template-columns:auto 1fr}.badge{display:none}
+
+      .wrap{
+        padding:14px;
+      }
+
+      .hero{
+        padding:22px;
+
+        border-radius:22px;
+      }
+
+
+      header{
+        align-items:flex-start;
+      }
+
+
+      .header-actions{
+        justify-content:flex-end;
+        gap:6px;
+      }
+
+
+      .ghost{
+        padding:9px 12px;
+
+        font-size:.82rem;
+      }
+
+
+      .hero-actions{
+        display:grid;
+
+        grid-template-columns:
+          1fr 1fr;
+      }
+
+
+      .primary,
+      .secondary{
+        width:100%;
+      }
+
+
+      .summary{
+        align-items:flex-start;
+
+        flex-direction:column;
+      }
+
+
+      .food-card{
+        grid-template-columns:
+          auto 1fr;
+      }
+
+
+      .badge{
+        display:none;
+      }
+
     }
 
   </style>
+
 </head>
+
+
 <body>
+
 <div class="wrap">
- <header>
-  <div class="brand">
-    <div class="logo">🍽️</div>
-    <div>
-      <h1>오늘 뭐 먹지?</h1>
-      <div class="sub">점심 고민 30초 컷, 취향 맞춤 메뉴 추천</div>
+
+
+  <!-- ========================
+       상단 헤더
+  ========================= -->
+
+  <header>
+
+    <div class="brand">
+
+      <div class="logo">
+        🍽️
+      </div>
+
+      <div>
+
+        <h1>
+          오늘 뭐 먹지?
+        </h1>
+
+        <div class="sub">
+          점심 고민 30초 컷, 취향 맞춤 메뉴 추천
+        </div>
+
+      </div>
+
     </div>
-  </div>
 
-  <div class="header-actions">
-    <a
-      href="https://leegaeun1125.github.io/leegaeun-project/calculator/"
-      class="ghost nav-link"
-    >
-      🧮 공학용 계산기
-    </a>
 
-    <button class="ghost" id="resetBtn">↻ 초기화</button>
-  </div>
-</header>
+    <!-- 오른쪽 상단 버튼 -->
+
+    <div class="header-actions">
+
+      <!-- 공학용 계산기로 이동 -->
+
+      <a
+        href="https://leegaeun1125.github.io/leegaeun-project/calculator/"
+        class="ghost nav-link"
+      >
+        🧮 공학용 계산기
+      </a>
+
+
+      <!-- 초기화 -->
+
+      <button
+        class="ghost"
+        id="resetBtn"
+      >
+        ↻ 초기화
+      </button>
+
+    </div>
+
+  </header>
+
+
+
+  <!-- ========================
+       메인 HERO
+  ========================= -->
 
   <section class="hero">
+
     <div>
-      <div class="eyebrow">Lunch Picker</div>
-      <h2>점심은<br>고민 말고 선택.</h2>
-      <p>한식부터 면, 국물, 가벼운 메뉴까지 오늘 기분과 예산, 매운맛 선호도에 맞춰 추천해드려요.</p>
-      <div class="hero-actions">
-        <button class="primary" id="randomBtn">🎲 랜덤 추천</button>
-        <button class="secondary" id="safeBtn">👍 실패 없는 메뉴</button>
+
+      <div class="eyebrow">
+        Lunch Picker
       </div>
+
+
+      <h2>
+        점심은<br>
+        고민 말고 선택.
+      </h2>
+
+
+      <p>
+        한식부터 면, 국물, 가벼운 메뉴까지
+        오늘 기분과 예산, 매운맛 선호도에 맞춰
+        추천해드려요.
+      </p>
+
+
+      <div class="hero-actions">
+
+        <button
+          class="primary"
+          id="randomBtn"
+        >
+          🎲 랜덤 추천
+        </button>
+
+
+        <button
+          class="secondary"
+          id="safeBtn"
+        >
+          👍 실패 없는 메뉴
+        </button>
+
+      </div>
+
     </div>
+
+
     <div class="plate">
-      <div class="dish" id="dishEmoji">🍛</div>
+
+      <div
+        class="dish"
+        id="dishEmoji"
+      >
+        🍛
+      </div>
+
     </div>
+
   </section>
+
+
+
+  <!-- ========================
+       메뉴 설정 / 추천 영역
+  ========================= -->
 
   <section class="grid">
+
+
+    <!-- 왼쪽 설정 -->
+
     <aside class="panel">
-      <h3>내 취향 설정</h3>
+
+      <h3>
+        내 취향 설정
+      </h3>
+
+
+      <!-- 기분 -->
 
       <div class="field">
-        <label>오늘의 기분</label>
+
+        <label>
+          오늘의 기분
+        </label>
+
+
         <div class="chip-grid">
-          <button class="chip active" data-mood="all">아무거나</button>
-          <button class="chip" data-mood="hearty">든든하게</button>
-          <button class="chip" data-mood="light">가볍게</button>
-          <button class="chip" data-mood="comfort">따뜻하게</button>
+
+          <button
+            class="chip active"
+            data-mood="all"
+          >
+            아무거나
+          </button>
+
+
+          <button
+            class="chip"
+            data-mood="hearty"
+          >
+            든든하게
+          </button>
+
+
+          <button
+            class="chip"
+            data-mood="light"
+          >
+            가볍게
+          </button>
+
+
+          <button
+            class="chip"
+            data-mood="comfort"
+          >
+            따뜻하게
+          </button>
+
         </div>
+
       </div>
 
+
+
+      <!-- 메뉴 종류 -->
+
       <div class="field">
-        <label for="category">메뉴 종류</label>
+
+        <label for="category">
+          메뉴 종류
+        </label>
+
+
         <select id="category">
-          <option value="all">전체</option>
-          <option value="korean">한식</option>
-          <option value="noodle">면/분식</option>
-          <option value="asian">아시안</option>
-          <option value="western">양식</option>
-          <option value="light">샐러드/가벼운식사</option>
+
+          <option value="all">
+            전체
+          </option>
+
+          <option value="korean">
+            한식
+          </option>
+
+          <option value="noodle">
+            면/분식
+          </option>
+
+          <option value="asian">
+            아시안
+          </option>
+
+          <option value="western">
+            양식
+          </option>
+
+          <option value="light">
+            샐러드/가벼운식사
+          </option>
+
         </select>
+
       </div>
 
+
+
+      <!-- 예산 -->
+
       <div class="field">
+
         <div class="range-row">
-          <label for="budget">예산</label>
-          <span><b id="budgetValue">15,000</b>원 이하</span>
+
+          <label for="budget">
+            예산
+          </label>
+
+          <span>
+            <b id="budgetValue">
+              15,000
+            </b>
+            원 이하
+          </span>
+
         </div>
-        <input id="budget" type="range" min="8000" max="25000" step="1000" value="15000" />
+
+
+        <input
+          id="budget"
+          type="range"
+          min="8000"
+          max="25000"
+          step="1000"
+          value="15000"
+        />
+
       </div>
 
+
+
+      <!-- 매운맛 -->
+
       <div class="field">
-        <label for="spicy">매운맛</label>
+
+        <label for="spicy">
+          매운맛
+        </label>
+
+
         <select id="spicy">
-          <option value="all">상관없음</option>
-          <option value="0">안 매운 것</option>
-          <option value="1">살짝 매운 것</option>
-          <option value="2">매운 것</option>
+
+          <option value="all">
+            상관없음
+          </option>
+
+          <option value="0">
+            안 매운 것
+          </option>
+
+          <option value="1">
+            살짝 매운 것
+          </option>
+
+          <option value="2">
+            매운 것
+          </option>
+
         </select>
+
       </div>
+
     </aside>
 
+
+
+    <!-- 오른쪽 메뉴 리스트 -->
+
     <main class="panel">
+
+
       <div class="summary">
+
         <div>
-          <div class="big">추천 메뉴</div>
-          <span id="countText">0개 메뉴</span>
+
+          <div class="big">
+            추천 메뉴
+          </div>
+
+          <span id="countText">
+            0개 메뉴
+          </span>
+
         </div>
-        <button class="ghost" id="reshuffleBtn">다시 섞기</button>
+
+
+        <button
+          class="ghost"
+          id="reshuffleBtn"
+        >
+          다시 섞기
+        </button>
+
       </div>
 
-      <div id="cards" class="cards"></div>
 
-      <div id="resultBox" class="result-box">
-        <div class="result-label">Today's Pick</div>
-        <div id="resultTitle" class="result-title"></div>
-        <div id="resultDesc" class="result-desc"></div>
+
+      <div
+        id="cards"
+        class="cards"
+      ></div>
+
+
+
+      <div
+        id="resultBox"
+        class="result-box"
+      >
+
+        <div class="result-label">
+          Today's Pick
+        </div>
+
+        <div
+          id="resultTitle"
+          class="result-title"
+        ></div>
+
+        <div
+          id="resultDesc"
+          class="result-desc"
+        ></div>
+
       </div>
+
+
     </main>
+
   </section>
+
+
 </div>
 
+
+
 <script>
+
+
+/* =========================
+   음식 데이터
+========================= */
+
 const foods = [
-  {name:"김치찌개", emoji:"🍲", category:"korean", mood:"comfort", price:10000, spicy:2, desc:"밥 한 공기 순삭. 실패 확률 낮은 직장인 점심 클래식."},
-  {name:"제육볶음", emoji:"🥘", category:"korean", mood:"hearty", price:11000, spicy:2, desc:"매콤하고 든든하게 먹고 싶은 날."},
-  {name:"비빔밥", emoji:"🍚", category:"korean", mood:"light", price:10000, spicy:1, desc:"채소와 밥을 균형 있게 먹고 싶은 날."},
-  {name:"설렁탕", emoji:"🥣", category:"korean", mood:"comfort", price:13000, spicy:0, desc:"속 편하고 따뜻하게 채우는 국물 메뉴."},
-  {name:"돈까스", emoji:"🍛", category:"western", mood:"hearty", price:12000, spicy:0, desc:"호불호 적고 만족도 높은 든든한 선택."},
-  {name:"쌀국수", emoji:"🍜", category:"asian", mood:"light", price:12000, spicy:0, desc:"부담 적고 향긋한 국물 면이 당길 때."},
-  {name:"마라탕", emoji:"🌶️", category:"asian", mood:"hearty", price:15000, spicy:2, desc:"얼얼하고 자극적인 한 끼가 필요한 날."},
-  {name:"칼국수", emoji:"🍜", category:"noodle", mood:"comfort", price:10000, spicy:0, desc:"뜨끈한 면과 국물 조합이 생각날 때."},
-  {name:"냉면", emoji:"🥢", category:"noodle", mood:"light", price:11000, spicy:1, desc:"깔끔하고 시원하게 먹고 싶은 날."},
-  {name:"떡볶이+김밥", emoji:"🍢", category:"noodle", mood:"hearty", price:9000, spicy:2, desc:"가성비 좋고 자극적인 분식 한 끼."},
-  {name:"샐러드볼", emoji:"🥗", category:"light", mood:"light", price:12000, spicy:0, desc:"오후까지 가볍게 가고 싶은 날."},
-  {name:"포케", emoji:"🥗", category:"light", mood:"light", price:14000, spicy:0, desc:"단백질과 채소를 깔끔하게 챙기는 메뉴."},
-  {name:"파스타", emoji:"🍝", category:"western", mood:"comfort", price:16000, spicy:0, desc:"조금 여유로운 점심 분위기를 내고 싶을 때."},
-  {name:"카레", emoji:"🍛", category:"asian", mood:"comfort", price:10000, spicy:1, desc:"향신료 풍미와 든든함을 동시에."},
-  {name:"순두부찌개", emoji:"🍲", category:"korean", mood:"comfort", price:10000, spicy:1, desc:"따뜻하고 부드러운 국물이 당기는 날."},
-  {name:"닭갈비", emoji:"🍗", category:"korean", mood:"hearty", price:14000, spicy:2, desc:"여럿이 먹기 좋고 강한 맛이 당길 때."},
+
+  {
+    name:"김치찌개",
+    emoji:"🍲",
+    category:"korean",
+    mood:"comfort",
+    price:10000,
+    spicy:2,
+    desc:"밥 한 공기 순삭. 실패 확률 낮은 직장인 점심 클래식."
+  },
+
+
+  {
+    name:"제육볶음",
+    emoji:"🥘",
+    category:"korean",
+    mood:"hearty",
+    price:11000,
+    spicy:2,
+    desc:"매콤하고 든든하게 먹고 싶은 날."
+  },
+
+
+  {
+    name:"비빔밥",
+    emoji:"🍚",
+    category:"korean",
+    mood:"light",
+    price:10000,
+    spicy:1,
+    desc:"채소와 밥을 균형 있게 먹고 싶은 날."
+  },
+
+
+  {
+    name:"설렁탕",
+    emoji:"🥣",
+    category:"korean",
+    mood:"comfort",
+    price:13000,
+    spicy:0,
+    desc:"속 편하고 따뜻하게 채우는 국물 메뉴."
+  },
+
+
+  {
+    name:"돈까스",
+    emoji:"🍛",
+    category:"western",
+    mood:"hearty",
+    price:12000,
+    spicy:0,
+    desc:"호불호 적고 만족도 높은 든든한 선택."
+  },
+
+
+  {
+    name:"쌀국수",
+    emoji:"🍜",
+    category:"asian",
+    mood:"light",
+    price:12000,
+    spicy:0,
+    desc:"부담 적고 향긋한 국물 면이 당길 때."
+  },
+
+
+  {
+    name:"마라탕",
+    emoji:"🌶️",
+    category:"asian",
+    mood:"hearty",
+    price:15000,
+    spicy:2,
+    desc:"얼얼하고 자극적인 한 끼가 필요한 날."
+  },
+
+
+  {
+    name:"칼국수",
+    emoji:"🍜",
+    category:"noodle",
+    mood:"comfort",
+    price:10000,
+    spicy:0,
+    desc:"뜨끈한 면과 국물 조합이 생각날 때."
+  },
+
+
+  {
+    name:"냉면",
+    emoji:"🥢",
+    category:"noodle",
+    mood:"light",
+    price:11000,
+    spicy:1,
+    desc:"깔끔하고 시원하게 먹고 싶은 날."
+  },
+
+
+  {
+    name:"떡볶이+김밥",
+    emoji:"🍢",
+    category:"noodle",
+    mood:"hearty",
+    price:9000,
+    spicy:2,
+    desc:"가성비 좋고 자극적인 분식 한 끼."
+  },
+
+
+  {
+    name:"샐러드볼",
+    emoji:"🥗",
+    category:"light",
+    mood:"light",
+    price:12000,
+    spicy:0,
+    desc:"오후까지 가볍게 가고 싶은 날."
+  },
+
+
+  {
+    name:"포케",
+    emoji:"🥗",
+    category:"light",
+    mood:"light",
+    price:14000,
+    spicy:0,
+    desc:"단백질과 채소를 깔끔하게 챙기는 메뉴."
+  },
+
+
+  {
+    name:"파스타",
+    emoji:"🍝",
+    category:"western",
+    mood:"comfort",
+    price:16000,
+    spicy:0,
+    desc:"조금 여유로운 점심 분위기를 내고 싶을 때."
+  },
+
+
+  {
+    name:"카레",
+    emoji:"🍛",
+    category:"asian",
+    mood:"comfort",
+    price:10000,
+    spicy:1,
+    desc:"향신료 풍미와 든든함을 동시에."
+  },
+
+
+  {
+    name:"순두부찌개",
+    emoji:"🍲",
+    category:"korean",
+    mood:"comfort",
+    price:10000,
+    spicy:1,
+    desc:"따뜻하고 부드러운 국물이 당기는 날."
+  },
+
+
+  {
+    name:"닭갈비",
+    emoji:"🍗",
+    category:"korean",
+    mood:"hearty",
+    price:14000,
+    spicy:2,
+    desc:"여럿이 먹기 좋고 강한 맛이 당길 때."
+  }
+
 ];
 
-let state = {mood:"all", category:"all", budget:15000, spicy:"all"};
 
-const cards = document.getElementById("cards");
-const countText = document.getElementById("countText");
-const budget = document.getElementById("budget");
-const budgetValue = document.getElementById("budgetValue");
-const dishEmoji = document.getElementById("dishEmoji");
-const resultBox = document.getElementById("resultBox");
-const resultTitle = document.getElementById("resultTitle");
-const resultDesc = document.getElementById("resultDesc");
+
+/* =========================
+   현재 설정 상태
+========================= */
+
+let state = {
+
+  mood:"all",
+
+  category:"all",
+
+  budget:15000,
+
+  spicy:"all"
+
+};
+
+
+
+/* =========================
+   HTML 요소
+========================= */
+
+const cards =
+  document.getElementById("cards");
+
+
+const countText =
+  document.getElementById("countText");
+
+
+const budget =
+  document.getElementById("budget");
+
+
+const budgetValue =
+  document.getElementById("budgetValue");
+
+
+const dishEmoji =
+  document.getElementById("dishEmoji");
+
+
+const resultBox =
+  document.getElementById("resultBox");
+
+
+const resultTitle =
+  document.getElementById("resultTitle");
+
+
+const resultDesc =
+  document.getElementById("resultDesc");
+
+
+
+/* =========================
+   조건 필터링
+========================= */
 
 function getFiltered(){
+
   return foods.filter(f =>
-    (state.mood==="all" || f.mood===state.mood) &&
-    (state.category==="all" || f.category===state.category) &&
-    f.price <= state.budget &&
-    (state.spicy==="all" || String(f.spicy)===state.spicy)
+
+    (
+      state.mood === "all"
+      ||
+      f.mood === state.mood
+    )
+
+    &&
+
+    (
+      state.category === "all"
+      ||
+      f.category === state.category
+    )
+
+    &&
+
+    f.price <= state.budget
+
+    &&
+
+    (
+      state.spicy === "all"
+      ||
+      String(f.spicy) === state.spicy
+    )
+
   );
+
 }
 
+
+
+/* =========================
+   메뉴 화면 출력
+========================= */
+
 function render(){
-  const list = getFiltered();
+
+  const list =
+    getFiltered();
+
+
   cards.innerHTML = "";
-  countText.textContent = `${list.length}개 메뉴`;
+
+
+  countText.textContent =
+    `${list.length}개 메뉴`;
+
+
 
   if(!list.length){
-    cards.innerHTML = '<div class="empty" style="grid-column:1/-1">조건에 맞는 메뉴가 없어요. 예산이나 매운맛 조건을 조금 넓혀보세요.</div>';
+
+    cards.innerHTML = `
+
+      <div
+        class="empty"
+        style="grid-column:1/-1"
+      >
+
+        조건에 맞는 메뉴가 없어요.
+
+        예산이나 매운맛 조건을
+        조금 넓혀보세요.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+
+  list.forEach(f => {
+
+    const el =
+      document.createElement("div");
+
+
+    el.className =
+      "food-card";
+
+
+    el.innerHTML = `
+
+      <div class="emoji">
+        ${f.emoji}
+      </div>
+
+
+      <div>
+
+        <div class="food-name">
+          ${f.name}
+        </div>
+
+
+        <div class="food-meta">
+
+          ${f.price.toLocaleString()}원
+
+          ·
+
+          ${f.desc}
+
+        </div>
+
+      </div>
+
+
+      <span class="badge">
+
+        ${
+          f.spicy === 0
+
+          ? "안 매움"
+
+          : f.spicy === 1
+
+          ? "살짝 매움"
+
+          : "매움"
+        }
+
+      </span>
+
+
+      <button class="pick-btn">
+
+        이 메뉴로 결정
+
+      </button>
+
+    `;
+
+
+
+    el
+      .querySelector(".pick-btn")
+      .onclick =
+      () => pickFood(f);
+
+
+
+    cards.appendChild(el);
+
+  });
+
+}
+
+
+
+/* =========================
+   음식 선택
+========================= */
+
+function pickFood(food){
+
+  dishEmoji.textContent =
+    food.emoji;
+
+
+  resultTitle.textContent =
+    `${food.emoji} ${food.name}`;
+
+
+  resultDesc.textContent =
+
+    `${food.price.toLocaleString()}원대 · ${food.desc}`;
+
+
+  resultBox
+    .classList
+    .add("show");
+
+}
+
+
+
+/* =========================
+   랜덤 선택
+========================= */
+
+function randomPick(
+  source = getFiltered()
+){
+
+  if(!source.length){
     return;
   }
 
-  list.forEach(f=>{
-    const el = document.createElement("div");
-    el.className = "food-card";
-    el.innerHTML = `
-      <div class="emoji">${f.emoji}</div>
-      <div>
-        <div class="food-name">${f.name}</div>
-        <div class="food-meta">${f.price.toLocaleString()}원 · ${f.desc}</div>
-      </div>
-      <span class="badge">${f.spicy===0?"안 매움":f.spicy===1?"살짝 매움":"매움"}</span>
-      <button class="pick-btn">이 메뉴로 결정</button>
-    `;
-    el.querySelector(".pick-btn").onclick = ()=>pickFood(f);
-    cards.appendChild(el);
-  });
-}
 
-function pickFood(food){
-  dishEmoji.textContent = food.emoji;
-  resultTitle.textContent = `${food.emoji} ${food.name}`;
-  resultDesc.textContent = `${food.price.toLocaleString()}원대 · ${food.desc}`;
-  resultBox.classList.add("show");
-}
+  const food =
+    source[
+      Math.floor(
+        Math.random()
+        *
+        source.length
+      )
+    ];
 
-function randomPick(source = getFiltered()){
-  if(!source.length) return;
-  const food = source[Math.floor(Math.random()*source.length)];
+
   pickFood(food);
+
 }
 
-document.querySelectorAll(".chip").forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));
-    btn.classList.add("active");
-    state.mood = btn.dataset.mood;
-    resultBox.classList.remove("show");
+
+
+/* =========================
+   기분 버튼
+========================= */
+
+document
+  .querySelectorAll(".chip")
+  .forEach(btn => {
+
+
+    btn.onclick = () => {
+
+
+      document
+        .querySelectorAll(".chip")
+        .forEach(x =>
+          x.classList.remove("active")
+        );
+
+
+      btn
+        .classList
+        .add("active");
+
+
+      state.mood =
+        btn.dataset.mood;
+
+
+      resultBox
+        .classList
+        .remove("show");
+
+
+      render();
+
+    };
+
+  });
+
+
+
+/* =========================
+   카테고리
+========================= */
+
+document
+  .getElementById("category")
+  .onchange = e => {
+
+
+    state.category =
+      e.target.value;
+
+
+    resultBox
+      .classList
+      .remove("show");
+
+
     render();
-  }
-});
 
-document.getElementById("category").onchange=e=>{
-  state.category=e.target.value;
-  resultBox.classList.remove("show");
+  };
+
+
+
+/* =========================
+   예산
+========================= */
+
+budget.oninput = e => {
+
+
+  state.budget =
+    +e.target.value;
+
+
+  budgetValue.textContent =
+    state.budget
+      .toLocaleString();
+
+
+  resultBox
+    .classList
+    .remove("show");
+
+
   render();
+
 };
 
-budget.oninput=e=>{
-  state.budget = +e.target.value;
-  budgetValue.textContent = state.budget.toLocaleString();
-  resultBox.classList.remove("show");
-  render();
-};
 
-document.getElementById("spicy").onchange=e=>{
-  state.spicy=e.target.value;
-  resultBox.classList.remove("show");
-  render();
-};
 
-document.getElementById("randomBtn").onclick=()=>randomPick();
-document.getElementById("reshuffleBtn").onclick=()=>randomPick();
+/* =========================
+   매운맛
+========================= */
 
-document.getElementById("safeBtn").onclick=()=>{
-  const safe = foods.filter(f =>
-    ["돈까스","김치찌개","비빔밥","설렁탕","칼국수","쌀국수"].includes(f.name) &&
-    f.price <= state.budget
-  );
-  randomPick(safe.length ? safe : foods);
-};
+document
+  .getElementById("spicy")
+  .onchange = e => {
 
-document.getElementById("resetBtn").onclick=()=>{
-  state={mood:"all", category:"all", budget:15000, spicy:"all"};
-  document.querySelectorAll(".chip").forEach(x=>x.classList.toggle("active", x.dataset.mood==="all"));
-  document.getElementById("category").value="all";
-  budget.value=15000;
-  budgetValue.textContent="15,000";
-  document.getElementById("spicy").value="all";
-  resultBox.classList.remove("show");
-  dishEmoji.textContent="🍛";
-  render();
-};
+
+    state.spicy =
+      e.target.value;
+
+
+    resultBox
+      .classList
+      .remove("show");
+
+
+    render();
+
+  };
+
+
+
+/* =========================
+   랜덤 추천
+========================= */
+
+document
+  .getElementById("randomBtn")
+  .onclick = () =>
+    randomPick();
+
+
+
+/* =========================
+   다시 섞기
+========================= */
+
+document
+  .getElementById("reshuffleBtn")
+  .onclick = () =>
+    randomPick();
+
+
+
+/* =========================
+   실패 없는 메뉴
+========================= */
+
+document
+  .getElementById("safeBtn")
+  .onclick = () => {
+
+
+    const safe =
+      foods.filter(f =>
+
+
+        [
+          "돈까스",
+          "김치찌개",
+          "비빔밥",
+          "설렁탕",
+          "칼국수",
+          "쌀국수"
+        ]
+        .includes(f.name)
+
+        &&
+
+        f.price <= state.budget
+
+      );
+
+
+    randomPick(
+      safe.length
+      ?
+      safe
+      :
+      foods
+    );
+
+  };
+
+
+
+/* =========================
+   초기화
+========================= */
+
+document
+  .getElementById("resetBtn")
+  .onclick = () => {
+
+
+    state = {
+
+      mood:"all",
+
+      category:"all",
+
+      budget:15000,
+
+      spicy:"all"
+
+    };
+
+
+    document
+      .querySelectorAll(".chip")
+      .forEach(x =>
+        x.classList.toggle(
+          "active",
+          x.dataset.mood === "all"
+        )
+      );
+
+
+    document
+      .getElementById("category")
+      .value = "all";
+
+
+    budget.value =
+      15000;
+
+
+    budgetValue.textContent =
+      "15,000";
+
+
+    document
+      .getElementById("spicy")
+      .value = "all";
+
+
+    resultBox
+      .classList
+      .remove("show");
+
+
+    dishEmoji.textContent =
+      "🍛";
+
+
+    render();
+
+  };
+
+
+
+/* =========================
+   최초 실행
+========================= */
 
 render();
 
 </script>
+
+
 </body>
 </html>
