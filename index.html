@@ -1,11 +1,5 @@
 <!DOCTYPE html>
-<header class="top-header">
-  <h1>오늘 뭐먹지?</h1>
 
-  <a href="./calculator/" class="nav-button">
-    공학용 계산기
-  </a>
-</header>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -152,6 +146,24 @@
       .summary{align-items:flex-start;flex-direction:column}
       .food-card{grid-template-columns:auto 1fr}.badge{display:none}
     }
+.nav-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: #1f2937;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid #334155;
+  cursor: pointer;
+}
+
+.nav-button:hover {
+  background: #334155;
+}
   </style>
 </head>
 <body>
@@ -380,6 +392,11 @@ document.getElementById("resetBtn").onclick=()=>{
 };
 
 render();
+
+  <a href="https://leegaeun1125.github.io/leegaeun-project/calculator/"
+   class="nav-button">
+  🧮 공학용 계산기
+</a>
 </script>
 </body>
 </html>
