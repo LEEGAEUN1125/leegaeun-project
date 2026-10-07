@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>실시간 현황 대시보드</title>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #162033;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-soft: #e8f0ff;
+      --border: #e5e7eb;
+      --success: #059669;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .title-wrap h1 {
+      margin: 0 0 8px;
+      font-size: clamp(24px, 3vw, 36px);
+      letter-spacing: -0.04em;
+    }
+
+    .title-wrap p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .status-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 9px 12px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.03);
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.12);
+    }
+
+    .dot.error {
+      background: var(--danger);
+      box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      background: var(--primary);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+    button:hover { transform: translateY(-1px); filter: brightness(0.98); }
+
+    .notice {
+      display: none;
+      margin-bottom: 16px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+      background: var(--panel);
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .control label {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .kpi {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      min-height: 124px;
+    }
+
+    .kpi .label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .kpi .value {
+      font-size: clamp(24px, 3vw, 34px);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      word-break: break-all;
+    }
+
+    .kpi .sub {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .panel-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .panel-title h2 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .panel-title span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 340px;
+    }
+
+    .table-panel {
+      overflow: hidden;
+    }
+
+    .table-scroll {
+      overflow: auto;
+      max-height: 520px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 12px;
+    }
+
+    tbody tr:hover { background: #f8fbff; }
+
+    .empty {
+      display: grid;
+      place-items: center;
+      min-height: 260px;
+      color: var(--muted);
+      text-align: center;
+      padding: 24px;
+    }
+
+    .footer {
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 1050px) {
+      .controls, .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 650px) {
+      .app { padding: 14px; }
+      .header { flex-direction: column; }
+      .status-box { justify-content: flex-start; }
+      .controls, .kpis { grid-template-columns: 1fr; }
+      .chart-wrap { height: 280px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="title-wrap">
+        <h1>실시간 현황 대시보드</h1>
+        <p>Google Sheets 공개 CSV 기반 · 30초 자동 갱신</p>
+      </div>
+      <div class="status-box">
+        <div class="badge"><span id="statusDot" class="dot"></span><span id="statusText">데이터 연결 중</span></div>
+        <div class="badge">최근 갱신: <strong id="updatedAt">-</strong></div>
+        <div class="badge">다음 갱신: <strong id="countdown">30초</strong></div>
+        <button id="refreshBtn">지금 새로고침</button>
+      </div>
+    </header>
+
+    <div id="notice" class="notice"></div>
+
+    <section class="controls">
+      <div class="control">
+        <label for="metricSelect">분석 지표</label>
+        <select id="metricSelect"></select>
+      </div>
+      <div class="control">
+        <label for="groupSelect">그룹 기준</label>
+        <select id="groupSelect"></select>
+      </div>
+      <div class="control">
+        <label for="filterColumn">필터 열</label>
+        <select id="filterColumn"></select>
+      </div>
+      <div class="control">
+        <label for="filterValue">필터 값</label>
+        <select id="filterValue"></select>
+      </div>
+    </section>
+
+    <section class="kpis">
+      <div class="kpi">
+        <div class="label">데이터 건수</div>
+        <div class="value" id="kpiRows">-</div>
+        <div class="sub" id="kpiRowsSub">전체 행 기준</div>
+      </div>
+      <div class="kpi">
+        <div class="label" id="kpiSumLabel">선택 지표 합계</div>
+        <div class="value" id="kpiSum">-</div>
+        <div class="sub">현재 필터 적용 기준</div>
+      </div>
+      <div class="kpi">
+        <div class="label" id="kpiAvgLabel">선택 지표 평균</div>
+        <div class="value" id="kpiAvg">-</div>
+        <div class="sub">숫자값이 있는 행 기준</div>
+      </div>
+      <div class="kpi">
+        <div class="label">분류 항목 수</div>
+        <div class="value" id="kpiGroups">-</div>
+        <div class="sub" id="kpiGroupsSub">선택한 그룹 기준</div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="panel-title">
+          <h2 id="trendTitle">지표 추이</h2>
+          <span>그룹별 합계</span>
+        </div>
+        <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <h2 id="rankTitle">상위 항목</h2>
+          <span>TOP 10</span>
+        </div>
+        <div class="chart-wrap"><canvas id="rankChart"></canvas></div>
+      </div>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="panel-title">
+        <h2>데이터 상세</h2>
+        <span id="tableInfo">최대 100건 표시</span>
+      </div>
+      <div id="tableContainer" class="table-scroll"></div>
+    </section>
+
+    <div class="footer">
+      <span>원본 데이터: Google Sheets 공개 CSV</span>
+      <span>자동 갱신 주기: 30초</span>
+    </div>
+  </div>
+
+<script>
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT7T3FZsjnJ8VzcToZIyMPibz7UqPAjPCt3TL1r_1hyogr0sLd8RyONXZzjc57U9JPp6b7cN2SK0ud0/pub?output=csv';
+const REFRESH_SECONDS = 30;
+
+let rawData = [];
+let headers = [];
+let numericColumns = [];
+let categoricalColumns = [];
+let dateColumns = [];
+let trendChart = null;
+let rankChart = null;
+let secondsLeft = REFRESH_SECONDS;
+let firstLoad = true;
+
+const $ = (id) => document.getElementById(id);
+
+function setStatus(ok, text) {
+  $('statusText').textContent = text;
+  $('statusDot').classList.toggle('error', !ok);
+}
+
+function showNotice(message) {
+  $('notice').style.display = message ? 'block' : 'none';
+  $('notice').textContent = message || '';
+}
+
+function normalizeNumber(value) {
+  if (value === null || value === undefined) return NaN;
+  const cleaned = String(value).trim().replace(/,/g, '').replace(/%$/, '');
+  if (cleaned === '') return NaN;
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : NaN;
+}
+
+function looksLikeDate(value) {
+  if (!value) return false;
+  const s = String(value).trim();
+  if (!s) return false;
+  const patterns = [
+    /^\d{4}[-/.]\d{1,2}[-/.]\d{1,2}$/,
+    /^\d{4}[-/.]\d{1,2}$/,
+    /^\d{4}년\s*\d{1,2}월(\s*\d{1,2}일)?$/
+  ];
+  if (!patterns.some(p => p.test(s))) return false;
+  const d = new Date(s.replace(/년\s*/,'-').replace(/월\s*/,'-').replace(/일/,'').replace(/\./g,'-').replace(/\//g,'-'));
+  return !isNaN(d.getTime());
+}
+
+function detectColumns(data) {
+  headers = data.length ? Object.keys(data[0]) : [];
+  numericColumns = [];
+  categoricalColumns = [];
+  dateColumns = [];
+
+  headers.forEach(col => {
+    const vals = data.map(r => r[col]).filter(v => String(v ?? '').trim() !== '').slice(0, 100);
+    if (!vals.length) return;
+
+    const numericRatio = vals.filter(v => Number.isFinite(normalizeNumber(v))).length / vals.length;
+    const dateRatio = vals.filter(v => looksLikeDate(v)).length / vals.length;
+
+    if (dateRatio >= 0.7) dateColumns.push(col);
+    if (numericRatio >= 0.75) numericColumns.push(col);
+    else categoricalColumns.push(col);
+  });
+
+  if (!categoricalColumns.length && headers.length) categoricalColumns = headers.filter(h => !numericColumns.includes(h));
+}
+
+function fillSelect(select, options, keepValue = true, includeAll = false) {
+  const old = keepValue ? select.value : '';
+  select.innerHTML = '';
+  if (includeAll) {
+    const op = document.createElement('option');
+    op.value = '__ALL__';
+    op.textContent = '전체';
+    select.appendChild(op);
+  }
+  options.forEach(v => {
+    const op = document.createElement('option');
+    op.value = v;
+    op.textContent = v;
+    select.appendChild(op);
+  });
+  if (old && [...select.options].some(o => o.value === old)) select.value = old;
+}
+
+function setupControls() {
+  fillSelect($('metricSelect'), numericColumns, true);
+  const groupCandidates = [...new Set([...dateColumns, ...categoricalColumns])].filter(c => c !== $('metricSelect').value);
+  fillSelect($('groupSelect'), groupCandidates, true);
+  fillSelect($('filterColumn'), categoricalColumns, true, true);
+  updateFilterValues();
+}
+
+function updateFilterValues() {
+  const col = $('filterColumn').value;
+  const select = $('filterValue');
+  if (!col || col === '__ALL__') {
+    fillSelect(select, [], false, true);
+    select.disabled = true;
+    return;
+  }
+  const vals = [...new Set(rawData.map(r => String(r[col] ?? '').trim()).filter(Boolean))]
+    .sort((a,b) => a.localeCompare(b, 'ko'));
+  fillSelect(select, vals, true, true);
+  select.disabled = false;
+}
+
+function filteredData() {
+  const col = $('filterColumn').value;
+  const val = $('filterValue').value;
+  if (!col || col === '__ALL__' || !val || val === '__ALL__') return rawData;
+  return rawData.filter(r => String(r[col] ?? '').trim() === val);
+}
+
+function formatNumber(n) {
+  if (!Number.isFinite(n)) return '-';
+  if (Math.abs(n) >= 1_000_000_000) return (n/1_000_000_000).toLocaleString('ko-KR', {maximumFractionDigits:1}) + 'B';
+  if (Math.abs(n) >= 1_000_000) return (n/1_000_000).toLocaleString('ko-KR', {maximumFractionDigits:1}) + 'M';
+  if (Math.abs(n) >= 1_000) return n.toLocaleString('ko-KR', {maximumFractionDigits:2});
+  return n.toLocaleString('ko-KR', {maximumFractionDigits:2});
+}
+
+function groupMetric(data, groupCol, metricCol) {
+  const map = new Map();
+  data.forEach(row => {
+    const key = String(row[groupCol] ?? '').trim() || '(빈 값)';
+    const num = normalizeNumber(row[metricCol]);
+    if (!Number.isFinite(num)) return;
+    map.set(key, (map.get(key) || 0) + num);
+  });
+  return [...map.entries()].map(([label, value]) => ({label, value}));
+}
+
+function dateSortable(label) {
+  const s = String(label).replace(/년\s*/,'-').replace(/월\s*/,'-').replace(/일/,'').replace(/\./g,'-').replace(/\//g,'-');
+  const t = new Date(s).getTime();
+  return Number.isFinite(t) ? t : Number.MAX_SAFE_INTEGER;
+}
+
+function renderKPIs(data) {
+  const metric = $('metricSelect').value;
+  const group = $('groupSelect').value;
+  const nums = data.map(r => normalizeNumber(r[metric])).filter(Number.isFinite);
+  const sum = nums.reduce((a,b) => a+b, 0);
+  const avg = nums.length ? sum / nums.length : NaN;
+  const groups = group ? new Set(data.map(r => String(r[group] ?? '').trim()).filter(Boolean)).size : 0;
+
+  $('kpiRows').textContent = data.length.toLocaleString('ko-KR');
+  $('kpiRowsSub').textContent = rawData.length === data.length ? '전체 데이터' : `전체 ${rawData.length.toLocaleString('ko-KR')}건 중 필터 결과`;
+  $('kpiSumLabel').textContent = metric ? `${metric} 합계` : '선택 지표 합계';
+  $('kpiSum').textContent = formatNumber(sum);
+  $('kpiAvgLabel').textContent = metric ? `${metric} 평균` : '선택 지표 평균';
+  $('kpiAvg').textContent = formatNumber(avg);
+  $('kpiGroups').textContent = groups.toLocaleString('ko-KR');
+  $('kpiGroupsSub').textContent = group ? `${group} 기준` : '그룹 기준 선택 필요';
+}
+
+function renderCharts(data) {
+  const metric = $('metricSelect').value;
+  const group = $('groupSelect').value;
+  if (!metric || !group) return;
+
+  let grouped = groupMetric(data, group, metric);
+  if (dateColumns.includes(group)) grouped.sort((a,b) => dateSortable(a.label) - dateSortable(b.label));
+  else grouped.sort((a,b) => a.label.localeCompare(b.label, 'ko'));
+
+  $('trendTitle').textContent = `${group}별 ${metric}`;
+  $('rankTitle').textContent = `${metric} 상위 항목`;
+
+  if (trendChart) trendChart.destroy();
+  trendChart = new Chart($('trendChart'), {
+    type: dateColumns.includes(group) ? 'line' : 'bar',
+    data: {
+      labels: grouped.map(x => x.label),
+      datasets: [{
+        label: metric,
+        data: grouped.map(x => x.value),
+        borderWidth: 2,
+        tension: 0.28,
+        pointRadius: grouped.length > 25 ? 1.5 : 3,
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37,99,235,0.18)'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => `${metric}: ${formatNumber(ctx.raw)}` } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxRotation: 45, minRotation: 0, autoSkip: true } },
+        y: { beginAtZero: true, ticks: { callback: v => formatNumber(Number(v)) } }
+      }
+    }
+  });
+
+  const top = [...grouped].sort((a,b) => b.value-a.value).slice(0,10).reverse();
+  if (rankChart) rankChart.destroy();
+  rankChart = new Chart($('rankChart'), {
+    type: 'bar',
+    data: {
+      labels: top.map(x => x.label),
+      datasets: [{
+        label: metric,
+        data: top.map(x => x.value),
+        borderWidth: 0,
+        backgroundColor: 'rgba(5,150,105,0.72)'
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => `${metric}: ${formatNumber(ctx.raw)}` } }
+      },
+      scales: {
+        x: { beginAtZero: true, ticks: { callback: v => formatNumber(Number(v)) } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+    .replaceAll('"','&quot;').replaceAll("'",'&#039;');
+}
+
+function renderTable(data) {
+  const rows = data.slice(0,100);
+  $('tableInfo').textContent = `${data.length.toLocaleString('ko-KR')}건 중 ${rows.length.toLocaleString('ko-KR')}건 표시`;
+  if (!headers.length) {
+    $('tableContainer').innerHTML = '<div class="empty">표시할 데이터가 없습니다.</div>';
+    return;
+  }
+  let html = '<table><thead><tr>' + headers.map(h => `<th>${escapeHtml(h)}</th>`).join('') + '</tr></thead><tbody>';
+  html += rows.map(row => '<tr>' + headers.map(h => `<td>${escapeHtml(row[h])}</td>`).join('') + '</tr>').join('');
+  html += '</tbody></table>';
+  $('tableContainer').innerHTML = html;
+}
+
+function renderAll() {
+  const data = filteredData();
+  renderKPIs(data);
+  renderCharts(data);
+  renderTable(data);
+}
+
+async function loadData() {
+  setStatus(true, '데이터 불러오는 중');
+  showNotice('');
+  try {
+    const url = CSV_URL + (CSV_URL.includes('?') ? '&' : '?') + '_=' + Date.now();
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const csv = await response.text();
+
+    const parsed = Papa.parse(csv, {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: h => String(h).trim()
+    });
+
+    if (parsed.errors?.length && !parsed.data?.length) throw new Error(parsed.errors[0].message);
+
+    rawData = parsed.data.filter(row => Object.values(row).some(v => String(v ?? '').trim() !== ''));
+    detectColumns(rawData);
+
+    if (!headers.length) throw new Error('CSV에 헤더가 없습니다.');
+    if (!numericColumns.length) showNotice('숫자형으로 인식되는 열이 없어 KPI/차트 일부가 제한될 수 있습니다.');
+
+    setupControls();
+    renderAll();
+
+    $('updatedAt').textContent = new Date().toLocaleTimeString('ko-KR', { hour12: false });
+    secondsLeft = REFRESH_SECONDS;
+    setStatus(true, '정상 연결');
+    firstLoad = false;
+  } catch (err) {
+    console.error(err);
+    setStatus(false, '연결 오류');
+    showNotice('Google Sheets 데이터를 불러오지 못했습니다. 시트가 "웹에 게시" 상태인지 확인하고, GitHub Pages에서 실행 중이라면 잠시 후 다시 시도해 주세요. 오류: ' + err.message);
+    if (firstLoad) {
+      $('tableContainer').innerHTML = '<div class="empty">데이터를 불러오지 못했습니다.<br>상단의 “지금 새로고침” 버튼으로 다시 시도할 수 있습니다.</div>';
+    }
+  }
+}
+
+$('metricSelect').addEventListener('change', () => {
+  const groups = [...new Set([...dateColumns, ...categoricalColumns])].filter(c => c !== $('metricSelect').value);
+  fillSelect($('groupSelect'), groups, true);
+  renderAll();
+});
+$('groupSelect').addEventListener('change', renderAll);
+$('filterColumn').addEventListener('change', () => { updateFilterValues(); renderAll(); });
+$('filterValue').addEventListener('change', renderAll);
+$('refreshBtn').addEventListener('click', loadData);
+
+setInterval(() => {
+  secondsLeft -= 1;
+  if (secondsLeft <= 0) {
+    secondsLeft = REFRESH_SECONDS;
+    loadData();
+  }
+  $('countdown').textContent = `${secondsLeft}초`;
+}, 1000);
+
+loadData();
+</script>
+</body>
+</html>
