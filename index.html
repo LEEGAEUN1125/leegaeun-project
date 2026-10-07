@@ -46,6 +46,19 @@
       border:1px solid var(--line);background:#fff;border-radius:999px;
       padding:11px 15px;cursor:pointer;color:var(--ink)
     }
+    .header-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.nav-link{
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
     .hero{
       background:linear-gradient(135deg,#2f2b27,#4b4037);
       color:white;border-radius:28px;padding:30px;
@@ -151,16 +164,26 @@
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="brand">
-      <div class="logo">🍽️</div>
-      <div>
-        <h1>오늘 뭐 먹지?</h1>
-        <div class="sub">점심 고민 30초 컷, 취향 맞춤 메뉴 추천</div>
-      </div>
+ <header>
+  <div class="brand">
+    <div class="logo">🍽️</div>
+    <div>
+      <h1>오늘 뭐 먹지?</h1>
+      <div class="sub">점심 고민 30초 컷, 취향 맞춤 메뉴 추천</div>
     </div>
+  </div>
+
+  <div class="header-actions">
+    <a
+      href="https://leegaeun1125.github.io/leegaeun-project/calculator/"
+      class="ghost nav-link"
+    >
+      🧮 공학용 계산기
+    </a>
+
     <button class="ghost" id="resetBtn">↻ 초기화</button>
-  </header>
+  </div>
+</header>
 
   <section class="hero">
     <div>
